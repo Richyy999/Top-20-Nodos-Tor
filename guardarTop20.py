@@ -34,7 +34,6 @@ def leer():
     
     log = Log()
     
-    
     ip = None
     nombre = None
     ancho = None
