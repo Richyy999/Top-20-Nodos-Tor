@@ -98,12 +98,15 @@ def leer():
 
 
 if __name__=="__main__":
-    numVueltas = 0
-    while numVueltas < 1:
+    periodo = int(input("Introduce el periodo de escaneo en horas: "))
+    numDias = int(input("Intorudce la duración del escaneo en días: "))
+    iteracionesTotales = (numDias * 24) / periodo
+    numIteraciones = 0
+    while numIteraciones < iteracionesTotales:
         try:
             leer()
-            #time.sleep(15*60)
-            numVueltas = numVueltas + 1
+            time.sleep(periodo * 3600)
+            numIteraciones = numIteraciones + 1
         except PermissionError:
             print("Se requiere ejecución con sudo")
             break
