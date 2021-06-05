@@ -2,6 +2,11 @@ from datetime import datetime as date
 import os
 import time
 
+RESULTS_FOLDR = "./results/"
+
+LOG_FOLDER = "./log/"
+LOG_FILE_NAME = "error.log"
+
 class Nodo():
 	
 	def __init__(self, nombre, ip, ancho):
@@ -12,13 +17,10 @@ class Nodo():
 class Log():
     
     def __init__(self):
-        carpeta = "./log/"
-        if not os.path.exists(carpeta):
-            os.makedirs(carpeta)
-        
-        logName = "error.log"
-        
-        self.log = open(carpeta + logName, "a")
+        if not os.path.exists(LOG_FOLDER):
+            os.makedirs(LOG_FOLDER)
+                
+        self.log = open(LOG_FOLDER + LOG_FILE_NAME, "a")
     
     def error(self, error):
         hora = date.today().strftime('%Y-%m-%d-%H:%M:%S')
@@ -78,13 +80,13 @@ def leer():
     
     print("Total de nodos: " + str(len(listaNodos)))
     
-    carpeta = "./results/"
-    if not os.path.exists(carpeta):
-        os.makedirs(carpeta)
+
+    if not os.path.exists(RESULTS_FOLDR):
+        os.makedirs(RESULTS_FOLDR)
     
     hora = date.today().strftime('%Y-%m-%d-%H:%M:%S')
 
-    archivoTop20 = open(carpeta + "{}.csv".format(hora), "w")
+    archivoTop20 = open(RESULTS_FOLDR + "{}.csv".format(hora), "w")
 
     separador = ";"
 
