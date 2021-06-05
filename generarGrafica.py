@@ -67,6 +67,23 @@ def getNombreNodos(diccionarioNodos):
 
 	return listaNombres
 
+def getHoras(diccionarioNodos):
+	listaHoras = []
+	for dia in diccionarioNodos.keys():
+		listaHoras.append(dia.strftime('%H:%M'))
+
+	return listaHoras
+
+def getNodosPorDia(diccionarioNodos, dia):
+	nodos = dict()
+	diaStr = dia.strftime('%Y-%m-%d')
+	for k, v in diccionarioNodos.items():
+		if k.strftime('%Y-%m-%d') == diaStr:
+			nodos.update({k : v})
+
+	return nodos
+
+
 
 def generarGraficaGeneral():
 	diccionarioNodos = leerTodo()
@@ -120,15 +137,40 @@ def generarTop5():
 	plt.legend()
 	plt.show()
 
+def generarGraficaUnDia():
+	diaStr = input('Indica el día con el formato día-mes-año:')
+	dia = date.strptime(diaStr, '%d-%m-%Y')
+	diccionarioNodos = leerTodo()
+	nodos = getNodosPorDia(diccionarioNodos, dia)
 
+	diccionarioIPs = crearDiccionarioIPs(nodos)
+
+	horas = getHoras(nodos)
+
+	plt.style.use('ggplot')
+
+	indice = 0
+	for v in diccionarioIPs.values():
+		if indice < 6:
+			plt.plot(horas, v, marker='.', label=(list(diccionarioIPs.keys())[indice]))
+		else:
+			plt.plot(horas, v, marker='.')
+		indice = indice + 1
+
+	plt.ylabel('Ancho de banda')
+	plt.xlabel('Horas')
+	plt.title('Ancho de banda del día ' + dia.strftime('%d/%m/%Y'))
+	plt.legend()
+	plt.show()
 
 
 #generarGraficaGeneral()
-generarTop5()
+#generarTop5()
+#generarGraficaUnDia()
 
-"""seguir = True
+seguir = True
 while seguir:
-	print('Elige una opción:\n1.- Gráfica general\n2.- Top 5 nodos\n3.- Salir')
+	print('Elige una opción:\n1.- Gráfica general\n2.- Top 5 nodos\n3.- Gráfica de un día concreto\n4.- Salir')
 	eleccion = int(input(''))
 
 	if eleccion == 1:
@@ -136,5 +178,7 @@ while seguir:
 	elif eleccion == 2:
 		generarTop5()
 	elif eleccion == 3:
+		generarGraficaUnDia()
+	elif eleccion == 4:
 		seguir = False
-		print('Adios')"""
+		print('Adios')
