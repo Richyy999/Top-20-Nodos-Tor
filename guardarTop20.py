@@ -84,7 +84,7 @@ def leer():
     if not os.path.exists(RESULTS_FOLDR):
         os.makedirs(RESULTS_FOLDR)
     
-    hora = date.today().strftime('%Y-%m-%d-%H:%M:%S')
+    hora = date.today().strftime('%Y-%m-%d-%H_%M_%S')
 
     archivoTop20 = open(RESULTS_FOLDR + "{}.csv".format(hora), "w")
 
