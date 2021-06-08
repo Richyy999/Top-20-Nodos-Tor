@@ -233,6 +233,7 @@ def getTop5(diccionarioNodos):
 
 
 def mostrarGrafica(dias, diccionarioIPs, listaNombres, xlabel, ylabel, title, folder):
+	plt.clf()
 	plt.style.use('ggplot')
 	indice = 0
 	for v in diccionarioIPs.values():
@@ -277,6 +278,8 @@ def mostrarBarras(dias, ipSeleccionada, xlabel, ylabel, title, folder):
 	ejeY = np.arange(len(dias))
 
 	try:
+		plt.clf()
+		plt.style.use('ggplot')
 		plt.xticks(ejeY, dias)
 		plt.bar(ejeY, list(ipSeleccionada.values())[0])
 		plt.ylabel(ylabel)
