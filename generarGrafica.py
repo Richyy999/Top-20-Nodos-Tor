@@ -2,6 +2,7 @@
 from matplotlib import pyplot as plt
 
 from datetime import datetime as date
+from datetime import timedelta
 
 from collections import OrderedDict
 
@@ -175,6 +176,20 @@ def getNombreNodosPorIP(diccionarioNodos, listaIPs):
 	return diccionarioNombres
 
 
+def getNodosEnIntervalo(diccionarioNodos, diaInicial, diaFinal):
+	diccionarioIntervalo = dict()
+	leer = False
+	for dia, nodos in diccionarioNodos.items():
+		if dia.strftime('%Y-%m-%d') == diaInicial.strftime('%Y-%m-%d'):
+			leer = True
+		if dia.strftime('%Y-%m-%d') == diaFinal.strftime('%Y-%m-%d'):
+			leer = False
+		if leer:
+			diccionarioIntervalo.update({dia : nodos})
+
+	return diccionarioIntervalo
+
+
 def mostrarGrafica(dias, diccionarioIPs, listaNombres, xlabel, ylabel, title):
 	plt.style.use('ggplot')
 	indice = 0
@@ -299,10 +314,38 @@ def generarGraficaUnaIP():
 		print('La IP seleccionada no existe')
 
 
+def generarGraficaIntervalo():
+	diaInicialStr = input('Indica el día inicial con el formato día-mes-año: ')
+	diaFinalStr = input('Indica el día final con el formato día-mes-año: ')
+	if diaInicialStr == diaFinalStr:
+		print('El intervalo debe ser de 2 días como mínimo')
+		return
+
+	diaInicial = date.strptime(diaInicialStr, '%d-%m-%Y')
+	diaFinal = date.strptime(diaFinalStr, '%d-%m-%Y')
+	diaFinal = diaFinal + timedelta(days=1)
+
+	print(diaFinal)
+
+	diccionarioNodos = leerTodo()
+	diccionarioMedia = getMediaAnchoPorDia(diccionarioNodos)
+
+	diccionarioIntervalo = getNodosEnIntervalo(diccionarioMedia, diaInicial, diaFinal)
+
+	diccionarioIPs = crearDiccionarioIPs(diccionarioIntervalo)
+
+	listaNombres = getNombreNodos(diccionarioIntervalo)
+
+	dias = getDias(diccionarioIntervalo)
+
+	mostrarGrafica(dias, diccionarioIPs, listaNombres, 'Ancho de banda (bps)', 'Día', 
+		'Nodos entre el ' + diaInicial.strftime('%d/%m') + ' y el ' + diaFinal.strftime('%d/%m'))
+
+
 seguir = True
 while seguir:
 	print('Elige una opción:\n1.- Gráfica general\n2.- Top 5 nodos\n3.- Gráfica de un día concreto\n' + 
-		'4.- Gráfica de una IP concreta\n5.- Salir')
+		'4.- Gráfica de una IP concreta\n5.- Gráfica en un intervalo de días\n6.- Salir')
 	eleccion = int(input(''))
 	os.system('clear')
 	if eleccion == 1:
@@ -314,5 +357,7 @@ while seguir:
 	elif eleccion == 4:
 		generarGraficaUnaIP()
 	elif eleccion == 5:
+		generarGraficaIntervalo()
+	elif eleccion == 6:
 		seguir = False
 		print('Adios')
