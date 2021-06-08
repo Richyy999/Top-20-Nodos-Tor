@@ -34,7 +34,7 @@ def leerTodo():
 	diccionarioNodos = dict()
 	for file in listdir(RESULTS_FOLDR):
 		try:
-			dia = date.strptime(path.splitext(file)[0], '%Y-%m-%d-%H:%M:%S')
+			dia = date.strptime(path.splitext(file)[0], '%Y-%m-%d-%H_%M_%S')
 		
 			listaNodos = []
 			archivo = None
