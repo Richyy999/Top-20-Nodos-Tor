@@ -288,6 +288,7 @@ def mostrarBarras(dias, ipSeleccionada, xlabel, ylabel, title, folder):
 			os.makedirs(carpeta)
 
 		rutaArchivo = None
+		hora = date.today().strftime('%Y-%m-%d-%H_%M_%S')
 		confirm = input('¿Deseas nombrar el archivo? [s,N]')
 		confirm = confirm.replace(' ', '')
 		if confirm == '' or confirm.lower() == 'n':
