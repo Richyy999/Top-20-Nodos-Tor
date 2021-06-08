@@ -15,10 +15,20 @@ from os.path import isfile
 import os
 
 from guardarTop20 import Nodo
-#from guardarTop20 import RESULTS_FOLDR
+from guardarTop20 import RESULTS_FOLDR
 from guardarTop20 import Log
 
-RESULTS_FOLDR = './'
+IMAGE_FOLDER = './img/'
+
+EXTENSION = '.png'
+
+CARPETA_IMAGEN_GENERAL = 'general/'
+CARPETA_IMAGEN_TOP5 = 'top5/'
+CARPETA_IMAGEN_DIA_CONCRETO = 'diaConcreto/'
+CARPETA_IMAGEN_IP_CONCRETA = 'ipConcreta/'
+CARPETA_IMAGEN_INTERVALO = 'intervalo/'
+CARPETA_IMAGEN_TOP5_INTERVALO = 'top5Intervalo/'
+CARPETA_IMAGEN_IP_EN_INTERVALO = 'ipIntervalo/'
 
 def leerTodo():
 	diccionarioNodos = dict()
@@ -222,7 +232,7 @@ def getTop5(diccionarioNodos):
 	return diccionarioTop5
 
 
-def mostrarGrafica(dias, diccionarioIPs, listaNombres, xlabel, ylabel, title):
+def mostrarGrafica(dias, diccionarioIPs, listaNombres, xlabel, ylabel, title, folder):
 	plt.style.use('ggplot')
 	indice = 0
 	for v in diccionarioIPs.values():
@@ -236,10 +246,34 @@ def mostrarGrafica(dias, diccionarioIPs, listaNombres, xlabel, ylabel, title):
 	plt.ylabel(ylabel)
 	plt.title(title)
 	plt.legend()
-	plt.show()
+
+	carpeta = IMAGE_FOLDER + folder
+	if not os.path.exists(carpeta):
+		os.makedirs(carpeta)
+
+	hora = date.today().strftime('%Y-%m-%d-%H_%M_%S')
+	rutaArchivo = None
+	confirm = input('¿Deseas nombrar el archivo? [s,N]')
+	confirm = confirm.replace(' ', '')
+	if confirm == '' or confirm.lower() == 'n':
+		rutaArchivo = carpeta + hora + EXTENSION
+	elif confirm.lower() == 's':
+		nombreArchivo = input('Introduce el nombre: ')
+		rutaArchivo = carpeta + nombreArchivo.replace(' ', '').strip() + EXTENSION
+	else:
+		rutaArchivo = carpeta + confirm.replace(' ', '').strip() + EXTENSION
+
+	try:
+		plt.savefig(rutaArchivo)
+		print('Gráfica guardada en:', rutaArchivo)
+	except Exception as e:
+		print('Error al guardar la gráfica')
+		log = Log()
+		log.error(e)
+		log.close()
 
 
-def mostrarBarras(dias, ipSeleccionada, xlabel, ylabel, title):
+def mostrarBarras(dias, ipSeleccionada, xlabel, ylabel, title, folder):
 	ejeY = np.arange(len(dias))
 
 	try:
@@ -249,12 +283,33 @@ def mostrarBarras(dias, ipSeleccionada, xlabel, ylabel, title):
 		plt.xlabel(xlabel)
 		plt.title(title)
 
-		plt.show()
+		carpeta = IMAGE_FOLDER + folder
+		if not os.path.exists(carpeta):
+			os.makedirs(carpeta)
+
+		rutaArchivo = None
+		confirm = input('¿Deseas nombrar el archivo? [s,N]')
+		confirm = confirm.replace(' ', '')
+		if confirm == '' or confirm.lower() == 'n':
+			rutaArchivo = carpeta + hora + EXTENSION
+		elif confirm.lower() == 's':
+			nombreArchivo = input('Introduce el nombre: ')
+			rutaArchivo = carpeta + nombreArchivo.replace(' ', '').strip() + EXTENSION
+		else:
+			rutaArchivo = carpeta + confirm.replace(' ', '').strip() + EXTENSION
+
+		plt.savefig(rutaArchivo)
+		print('Gráfica guardada en:', rutaArchivo)
 	except IndexError as e:
 		log = Log()
 		log.error(e)
 		log.close()
 		print('La IP seleccionada no existe o el intervalo no contiene datos o no es correcto')
+	except Exception as ex:
+		print('Error al guardar la gráfica')
+		log = Log()
+		log.error(e)
+		log.close()
 
 
 def generarGraficaGeneral():
@@ -268,7 +323,8 @@ def generarGraficaGeneral():
 
 	listaNombres = getNombreNodos(diccionarioMedia)
 
-	mostrarGrafica(dias, diccionarioIPs, listaNombres, 'Ancho de banda (bps)', 'Día', 'Top 20 IPs con más ancho de banda')
+	mostrarGrafica(dias, diccionarioIPs, listaNombres, 'Día', 'Ancho de banda (bps)', 
+		'Top 20 IPs con más ancho de banda', CARPETA_IMAGEN_GENERAL)
 
 
 def generarTop5():
@@ -284,7 +340,8 @@ def generarTop5():
 
 	listaNombres = getNombreNodos(diccionarioTop5)
 
-	mostrarGrafica(dias, diccionarioIPs, listaNombres, 'Ancho de banda (bps)', 'Día', 'Top 5 nodos con más ancho de banda')
+	mostrarGrafica(dias, diccionarioIPs, listaNombres, 'Día', 'Ancho de banda (bps)', 
+		'Top 5 nodos con más ancho de banda', CARPETA_IMAGEN_TOP5)
 
 
 def generarGraficaUnDia():
@@ -303,8 +360,8 @@ def generarGraficaUnDia():
 
 	listaNombres = getNombreNodos(nodos)
 
-	mostrarGrafica(horas, diccionarioIPs, listaNombres, 'Ancho de banda (bps)', 'Hora', 
-		'Ancho de banda del día ' + dia.strftime('%d/%m/%Y'))
+	mostrarGrafica(horas, diccionarioIPs, listaNombres, 'Hora', 'Ancho de banda (bps)', 
+		'Ancho de banda del día ' + dia.strftime('%d/%m/%Y'), CARPETA_IMAGEN_DIA_CONCRETO)
 
 
 def generarGraficaUnaIP():
@@ -321,7 +378,7 @@ def generarGraficaUnaIP():
 	dias = getDias(list(diccionarioMediaNodos.keys()))
 
 	mostrarBarras(dias, ipSeleccionada, 'Días', 'Ancho de banda (bps)', 
-		'Ancho de banda de la IP: ' + list(ipSeleccionada.keys())[0])
+		'Ancho de banda de la IP: ' + list(ipSeleccionada.keys())[0], CARPETA_IMAGEN_IP_CONCRETA)
 
 
 def generarGraficaIntervalo():
@@ -346,8 +403,8 @@ def generarGraficaIntervalo():
 
 	dias = getDias(diccionarioIntervalo)
 
-	mostrarGrafica(dias, diccionarioIPs, listaNombres, 'Ancho de banda (bps)', 'Día', 
-		'Nodos entre el ' + diaInicial.strftime('%d/%m') + ' y el ' + diaFinal.strftime('%d/%m'))
+	mostrarGrafica(dias, diccionarioIPs, listaNombres, 'Día', 'Ancho de banda (bps)', 
+		'Nodos entre el ' + diaInicial.strftime('%d/%m') + ' y el ' + diaFinal.strftime('%d/%m'), CARPETA_IMAGEN_INTERVALO)
 
 
 def generarTop5EnIntervalo():
@@ -382,8 +439,8 @@ def generarTop5EnIntervalo():
 
 	dias = getDias(diccionarioIntervalo)
 
-	mostrarGrafica(dias, diccionarioIPs, listaNombres, 'Ancho de banda (bps)', 'Día', 'Top 5 nodos entre el ' + 
-		diaInicial.strftime('%d/%m') + ' y el ' + diaFinal.strftime('%d/%m'))
+	mostrarGrafica(dias, diccionarioIPs, listaNombres, 'Día', 'Ancho de banda (bps)', 'Top 5 nodos entre el ' + 
+		diaInicial.strftime('%d/%m') + ' y el ' + diaFinal.strftime('%d/%m'), CARPETA_IMAGEN_TOP5_INTERVALO)
 
 def generarGraficaUnaIPEnIntervalo():
 	ip = input('Introduce la IP: ')
@@ -420,7 +477,8 @@ def generarGraficaUnaIPEnIntervalo():
 	dias = getDias(diccionarioIntervalo)
 
 	mostrarBarras(dias, ipSeleccionada, 'Días', 'Ancho de banda (bps)', 'Ancho de banda de la IP ' + 
-		ip + ' entre el ' + diaInicial.strftime('%d/%m') + ' y el ' + diaFinal.strftime('%d/%m'))
+		ip + ' entre el ' + diaInicial.strftime('%d/%m') + ' y el ' + diaFinal.strftime('%d/%m'), 
+		CARPETA_IMAGEN_IP_EN_INTERVALO)
 
 
 seguir = True
