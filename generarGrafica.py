@@ -15,10 +15,10 @@ from os.path import isfile
 import os
 
 from guardarTop20 import Nodo
-from guardarTop20 import RESULTS_FOLDR
+#from guardarTop20 import RESULTS_FOLDR
 from guardarTop20 import Log
 
-#RESULTS_FOLDR = './'
+RESULTS_FOLDR = './'
 
 def leerTodo():
 	diccionarioNodos = dict()
@@ -189,46 +189,10 @@ def getNodosEnIntervalo(diccionarioNodos, diaInicial, diaFinal):
 
 	return diccionarioIntervalo
 
-
-def mostrarGrafica(dias, diccionarioIPs, listaNombres, xlabel, ylabel, title):
-	plt.style.use('ggplot')
-	indice = 0
-	for v in diccionarioIPs.values():
-		if indice < 5:
-			plt.plot(dias, v, marker='.', label=listaNombres[indice])
-		else:
-			plt.plot(dias, v, marker='.')
-		indice = indice + 1
-
-	plt.xlabel(xlabel)
-	plt.ylabel(ylabel)
-	plt.title(title)
-	plt.legend()
-	plt.show()
-
-
-def generarGraficaGeneral():
-	diccionarioNodos = leerTodo()
-
-	diccionarioMedia = getMediaAnchoPorDia(diccionarioNodos)
-
-	dias = getDias(diccionarioMedia)
-
-	diccionarioIPs = crearDiccionarioIPs(diccionarioMedia)
-
-	listaNombres = getNombreNodos(diccionarioMedia)
-
-	mostrarGrafica(dias, diccionarioIPs, listaNombres, 'Ancho de banda (bps)', 'Día', 'Top 20 IPs con más ancho de banda')
-
-
-def generarTop5():
-	diccionarioNodos = leerTodo()
-	
-	diccionarioMediaNodos = getMediaAnchoPorDia(diccionarioNodos)
-
+def getTop5(diccionarioNodos):
 	#Calculo el total general de cada IP
 	diccionarioIPTotal = dict()
-	for nodos in diccionarioMediaNodos.values():
+	for nodos in diccionarioNodos.values():
 		for nodo in nodos:
 			if nodo.ip in diccionarioIPTotal:
 				diccionarioIPTotal[nodo.ip] += nodo.ancho
@@ -247,7 +211,7 @@ def generarTop5():
 		indice += 1
 
 	diccionarioTop5 = dict()
-	for dia, nodos in diccionarioMediaNodos.items():
+	for dia, nodos in diccionarioNodos.items():
 		for nodo in nodos:
 			if nodo.ip in listaTop5IPs:
 				if not dia in diccionarioTop5:
@@ -255,10 +219,69 @@ def generarTop5():
 				else:
 					diccionarioTop5[dia].append(nodo)
 
+	return diccionarioTop5
+
+
+def mostrarGrafica(dias, diccionarioIPs, listaNombres, xlabel, ylabel, title):
+	plt.style.use('ggplot')
+	indice = 0
+	for v in diccionarioIPs.values():
+		if indice < 5:
+			plt.plot(dias, v, marker='.', label=listaNombres[indice])
+		else:
+			plt.plot(dias, v, marker='.')
+		indice = indice + 1
+
+	plt.xlabel(xlabel)
+	plt.ylabel(ylabel)
+	plt.title(title)
+	plt.legend()
+	plt.show()
+
+
+def mostrarBarras(dias, ipSeleccionada, xlabel, ylabel, title):
+	ejeY = np.arange(len(dias))
+
+	try:
+		plt.xticks(ejeY, dias)
+		plt.bar(ejeY, list(ipSeleccionada.values())[0])
+		plt.ylabel(ylabel)
+		plt.xlabel(xlabel)
+		plt.title(title)
+
+		plt.show()
+	except IndexError as e:
+		log = Log()
+		log.error(e)
+		log.close()
+		print('La IP seleccionada no existe o el intervalo no contiene datos o no es correcto')
+
+
+def generarGraficaGeneral():
+	diccionarioNodos = leerTodo()
+
+	diccionarioMedia = getMediaAnchoPorDia(diccionarioNodos)
+
+	dias = getDias(diccionarioMedia)
+
+	diccionarioIPs = crearDiccionarioIPs(diccionarioMedia)
+
+	listaNombres = getNombreNodos(diccionarioMedia)
+
+	mostrarGrafica(dias, diccionarioIPs, listaNombres, 'Ancho de banda (bps)', 'Día', 'Top 20 IPs con más ancho de banda')
+
+
+def generarTop5():
+	diccionarioNodos = leerTodo()
+
+	diccionarioMediaNodos = getMediaAnchoPorDia(diccionarioNodos)
+
+	diccionarioTop5 = getTop5(diccionarioMediaNodos)
+
 	diccionarioIPs = crearDiccionarioIPs(diccionarioTop5)
-	
+
 	dias = getDias(diccionarioTop5)
-	
+
 	listaNombres = getNombreNodos(diccionarioTop5)
 
 	mostrarGrafica(dias, diccionarioIPs, listaNombres, 'Ancho de banda (bps)', 'Día', 'Top 5 nodos con más ancho de banda')
@@ -297,21 +320,8 @@ def generarGraficaUnaIP():
 
 	dias = getDias(list(diccionarioMediaNodos.keys()))
 
-	ejeY = np.arange(len(dias))
-
-	try:
-		plt.xticks(ejeY, dias)
-		plt.bar(ejeY, list(ipSeleccionada.values())[0])
-		plt.ylabel('Ancho de banda (bps)')
-		plt.xlabel('Día')
-		plt.title('Ancho de banda de la IP: ' + list(ipSeleccionada.keys())[0])
-
-		plt.show()
-	except IndexError as e:
-		log = Log()
-		log.error(e)
-		log.close()
-		print('La IP seleccionada no existe')
+	mostrarBarras(dias, ipSeleccionada, 'Días', 'Ancho de banda (bps)', 
+		'Ancho de banda de la IP: ' + list(ipSeleccionada.keys())[0])
 
 
 def generarGraficaIntervalo():
@@ -324,8 +334,6 @@ def generarGraficaIntervalo():
 	diaInicial = date.strptime(diaInicialStr, '%d-%m-%Y')
 	diaFinal = date.strptime(diaFinalStr, '%d-%m-%Y')
 	diaFinal = diaFinal + timedelta(days=1)
-
-	print(diaFinal)
 
 	diccionarioNodos = leerTodo()
 	diccionarioMedia = getMediaAnchoPorDia(diccionarioNodos)
@@ -342,10 +350,84 @@ def generarGraficaIntervalo():
 		'Nodos entre el ' + diaInicial.strftime('%d/%m') + ' y el ' + diaFinal.strftime('%d/%m'))
 
 
+def generarTop5EnIntervalo():
+	diaInicialStr = input('Indica el día inicial con el formato día-mes-año: ')
+	diaFinalStr = input('Indica el día final con el formato día-mes-año: ')
+	if diaInicialStr == diaFinalStr:
+		print('El intervalo debe ser de 2 días como mínimo')
+		return
+
+	diaInicial = None
+	diaFinal = None
+	try:
+		diaInicial = date.strptime(diaInicialStr, '%d-%m-%Y')
+		diaFinal = date.strptime(diaFinalStr, '%d-%m-%Y')
+		diaFinal = diaFinal + timedelta(days=1)
+	except Exception as e:
+		print('Formato de fecha no válido')
+		log = Log()
+		log.error(e)
+		log.close()
+		return
+
+	diccionarioNodos = leerTodo()
+	diccionarioMedia = getMediaAnchoPorDia(diccionarioNodos)
+	diccionarioTop5 = getTop5(diccionarioMedia)
+
+	diccionarioIntervalo = getNodosEnIntervalo(diccionarioTop5, diaInicial, diaFinal)
+
+	diccionarioIPs = crearDiccionarioIPs(diccionarioIntervalo)
+
+	listaNombres = getNombreNodos(diccionarioIntervalo)
+
+	dias = getDias(diccionarioIntervalo)
+
+	mostrarGrafica(dias, diccionarioIPs, listaNombres, 'Ancho de banda (bps)', 'Día', 'Top 5 nodos entre el ' + 
+		diaInicial.strftime('%d/%m') + ' y el ' + diaFinal.strftime('%d/%m'))
+
+def generarGraficaUnaIPEnIntervalo():
+	ip = input('Introduce la IP: ')
+	diaInicialStr = input('Indica el día inicial con el formato día-mes-año: ')
+	diaFinalStr = input('Indica el día final con el formato día-mes-año: ')
+
+	if diaInicialStr == diaFinalStr:
+		print('El intervalo debe ser de 2 días como mínimo')
+		return
+
+	diaInicial = None
+	diaFinal = None
+	try:
+		diaInicial = date.strptime(diaInicialStr, '%d-%m-%Y')
+		diaFinal = date.strptime(diaFinalStr, '%d-%m-%Y')
+		diaFinal = diaFinal + timedelta(days=1)
+	except Exception as e:
+		print('Formato de fecha no válido')
+		log = Log()
+		log.error(e)
+		log.close()
+		return
+
+	diccionarioNodos = leerTodo()
+	diccionarioMedia = getMediaAnchoPorDia(diccionarioNodos)
+	diccionarioIntervalo = getNodosEnIntervalo(diccionarioMedia, diaInicial, diaFinal)
+	diccionarioIPs = crearDiccionarioIPs(diccionarioIntervalo)
+
+	ipSeleccionada = dict()
+	for k, v in diccionarioIPs.items():
+		if k == ip:
+			ipSeleccionada.update({k : v})
+
+	dias = getDias(diccionarioIntervalo)
+
+	mostrarBarras(dias, ipSeleccionada, 'Días', 'Ancho de banda (bps)', 'Ancho de banda de la IP ' + 
+		ip + ' entre el ' + diaInicial.strftime('%d/%m') + ' y el ' + diaFinal.strftime('%d/%m'))
+
+
 seguir = True
 while seguir:
-	print('Elige una opción:\n1.- Gráfica general\n2.- Top 5 nodos\n3.- Gráfica de un día concreto\n' + 
-		'4.- Gráfica de una IP concreta\n5.- Gráfica en un intervalo de días\n6.- Salir')
+	print('Elige una opción:\n\n1.- Gráfica general\n2.- Top 5 nodos\n3.- Gráfica de un día concreto\n' + 
+		'4.- Gráfica de una IP concreta\n5.- Gráfica en un intervalo de días\n6.- Top 5 nodos en unintervalo de días\n' + 
+		'7.- Gráfica de una IP concreta en un intervalo de tiempo\n8.- Salir')
 	eleccion = int(input(''))
 	os.system('clear')
 	if eleccion == 1:
@@ -359,5 +441,9 @@ while seguir:
 	elif eleccion == 5:
 		generarGraficaIntervalo()
 	elif eleccion == 6:
+		generarTop5EnIntervalo()
+	elif eleccion == 7:
+		generarGraficaUnaIPEnIntervalo()
+	elif eleccion == 8:
 		seguir = False
 		print('Adios')
