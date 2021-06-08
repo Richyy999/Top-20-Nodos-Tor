@@ -23,7 +23,7 @@ class Log():
         self.log = open(LOG_FOLDER + LOG_FILE_NAME, "a")
     
     def error(self, error):
-        hora = date.today().strftime('%Y-%m-%d-%H:%M:%S')
+        hora = date.today().strftime('%Y-%m-%d-%H_%M_%S')
         self.log.write(hora + ":\n" + str(error) + "\n")
     
     def close(self):
