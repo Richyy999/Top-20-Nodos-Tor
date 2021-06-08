@@ -508,4 +508,3 @@ while seguir:
 		generarGraficaUnaIPEnIntervalo()
 	elif eleccion == 8:
 		seguir = False
-		print('Adios')
