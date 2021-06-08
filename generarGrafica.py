@@ -21,7 +21,7 @@ def leerTodo():
 	diccionarioNodos = dict()
 	for file in listdir(RESULTS_FOLDR):
 		try:
-			dia = date.strptime(path.splitext(file)[0], '%Y-%m-%d-%H_%M_%S')
+			dia = date.strptime(path.splitext(file)[0], '%Y-%m-%d-%H:%M:%S')
 		
 			listaNodos = []
 			archivo = None
@@ -41,7 +41,7 @@ def leerTodo():
 			log.close()
 
 	nodosOrdenados = OrderedDict(sorted(diccionarioNodos.items()))
-
+    
 	return nodosOrdenados
 
 def crearDiccionarioIPs(diccionarioNodos):
@@ -82,7 +82,7 @@ def getNombreNodos(diccionarioNodos):
 		for nodo in nodos:
 			if not nodo.nombre in listaNombres:
 				listaNombres.append(nodo.nombre)
-
+    
 	return listaNombres
 
 def getHoras(diccionarioNodos):
