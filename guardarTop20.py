@@ -8,11 +8,11 @@ LOG_FOLDER = "./log/"
 LOG_FILE_NAME = "error.log"
 
 class Nodo():
-	
-	def __init__(self, nombre, ip, ancho):
-		self.nombre = nombre
-		self.ip = ip
-		self.ancho = ancho
+    
+    def __init__(self, nombre, ip, ancho):
+        self.nombre = nombre
+        self.ip = ip
+        self.ancho = ancho
 
 class Log():
     
