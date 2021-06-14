@@ -474,13 +474,14 @@ def generarTop5EnIntervalo():
 
 	diccionarioNodos = leerTodo()
 	diccionarioMedia = getMediaAnchoPorDia(diccionarioNodos)
-	diccionarioTop5 = getTop5(diccionarioMedia)
 
-	diccionarioIntervalo = getNodosEnIntervalo(diccionarioTop5, diaInicial, diaFinal)
+	diccionarioIntervalo = getNodosEnIntervalo(diccionarioMedia, diaInicial, diaFinal)
 
-	diccionarioIPs = crearDiccionarioIPs(diccionarioIntervalo)
+	diccionarioTop5 = getTop5(diccionarioIntervalo)
 
-	listaNombres = getNombreNodos(diccionarioIntervalo)
+	diccionarioIPs = crearDiccionarioIPs(diccionarioTop5)
+
+	listaNombres = getNombreNodos(diccionarioTop5)
 
 	dias = getDias(diccionarioIntervalo)
 
