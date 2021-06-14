@@ -310,12 +310,12 @@ def mostrarBarras(dias, ipSeleccionada, xlabel, ylabel, title, folder):
 		log = Log()
 		log.error(e)
 		log.close()
-		print('La IP seleccionada no existe o el intervalo no contiene datos o no es correcto')
-	"""except Exception as ex:
-					print('Error al guardar la gráfica')
-					log = Log()
-					log.error(ex)
-					log.close()"""
+		print('El nodo seleccionado no existe o el intervalo no contiene datos o no es correcto')
+	except Exception as ex:
+		print('Error al guardar la gráfica')
+		log = Log()
+		log.error(ex)
+		log.close()
 
 
 def generarGraficaGeneral():
@@ -405,6 +405,10 @@ def generarGraficaNombreDeDominio():
 	for ip, nombre in diccionarioNombres.items():
 		if nombre == dominio:
 			ipsDominio.append(ip)
+
+	if len(ipsDominio) > 1:
+		print('EL nombre de dominio debe ser único. Intenta buscarlo por su IP.')
+		return
 
 	ipSeleccionada = dict()
 	for k, v in diccionarioMediaNodos.items():
@@ -522,6 +526,63 @@ def generarGraficaUnaIPEnIntervalo():
 		CARPETA_IMAGEN_IP_EN_INTERVALO)
 
 
+def generarGraficaNombreDeDominioIntervalo():
+	dominio = input('Introduce el nombre del dominio: ')
+	diaInicialStr = input('Indica el día inicial con el formato día-mes-año: ')
+	diaFinalStr = input('Indica el día final con el formato día-mes-año: ')
+
+	if diaInicialStr == diaFinalStr:
+		print('El intervalo debe ser de 2 días como mínimo')
+		return
+
+	diaInicial = None
+	diaFinal = None
+	try:
+		diaInicial = date.strptime(diaInicialStr, '%d-%m-%Y')
+		diaFinal = date.strptime(diaFinalStr, '%d-%m-%Y')
+		diaFinal = diaFinal + timedelta(days=1)
+	except Exception as e:
+		print('Formato de fecha no válido')
+		log = Log()
+		log.error(e)
+		log.close()
+		return
+
+	diccionarioNodos = leerTodo()
+
+	diccionarioMediaNodos = getMediaAnchoPorDia(diccionarioNodos)
+
+	diccionarioIntervalo = getNodosEnIntervalo(diccionarioMediaNodos, diaInicial, diaFinal)
+
+	diccionarioIPs = crearDiccionarioIPs(diccionarioIntervalo)
+
+	diccionarioNombres = getNombreNodosPorIP(diccionarioIntervalo, diccionarioIPs)
+
+	ipsDominio = []
+
+	for ip, nombre in diccionarioNombres.items():
+		if nombre == dominio:
+			ipsDominio.append(ip)
+
+	if len(ipsDominio) > 1:
+		print('EL nombre de dominio debe ser único. Intenta buscarlo por su IP.')
+		return
+
+	ipSeleccionada = dict()
+	for k, v in diccionarioMediaNodos.items():
+		for nodo in v:
+			if nodo.nombre.strip() == dominio and k in ipSeleccionada:
+				ipSeleccionada[k].append(nodo.ancho)
+			elif nodo.nombre.strip() == dominio:
+				ipSeleccionada.update({k : [nodo.ancho]})
+
+	dias = getDias(list(ipSeleccionada.keys()))
+
+	mostrarBarras(dias, ipSeleccionada, 'Días', 'Ancho de banda (bps)', 
+		'Ancho de banda del dominio ' + dominio + ' entre el ' + diaInicial.strftime('%d/%m') + ' y el ' + 
+		diaFinal.strftime('%d/%m'), CARPETA_NOMBRE_DOMINIO_INTERVALO)
+
+
 seguir = True
 while seguir:
 	print('Elige una opción:\n\n1.- Gráfica general\n2.- Top 5 nodos\n3.- Gráfica de un día concreto\n' + 
@@ -547,6 +608,6 @@ while seguir:
 	elif eleccion == 8:
 		generarGraficaUnaIPEnIntervalo()
 	elif eleccion == 9:
-		pass
+		generarGraficaNombreDeDominioIntervalo()
 	elif eleccion == 10:
 		seguir = False
