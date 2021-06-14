@@ -26,9 +26,11 @@ CARPETA_IMAGEN_GENERAL = 'general/'
 CARPETA_IMAGEN_TOP5 = 'top5/'
 CARPETA_IMAGEN_DIA_CONCRETO = 'diaConcreto/'
 CARPETA_IMAGEN_IP_CONCRETA = 'ipConcreta/'
+CARPETA_NOMBRE_DOMINIO = 'nombreDominio/'
 CARPETA_IMAGEN_INTERVALO = 'intervalo/'
 CARPETA_IMAGEN_TOP5_INTERVALO = 'top5Intervalo/'
 CARPETA_IMAGEN_IP_EN_INTERVALO = 'ipIntervalo/'
+CARPETA_NOMBRE_DOMINIO_INTERVALO = 'nombreDominioIntervalo/'
 
 def leerTodo():
 	diccionarioNodos = dict()
@@ -309,11 +311,11 @@ def mostrarBarras(dias, ipSeleccionada, xlabel, ylabel, title, folder):
 		log.error(e)
 		log.close()
 		print('La IP seleccionada no existe o el intervalo no contiene datos o no es correcto')
-	except Exception as ex:
-		print('Error al guardar la gráfica')
-		log = Log()
-		log.error(e)
-		log.close()
+	"""except Exception as ex:
+					print('Error al guardar la gráfica')
+					log = Log()
+					log.error(ex)
+					log.close()"""
 
 
 def generarGraficaGeneral():
@@ -384,7 +386,38 @@ def generarGraficaUnaIP():
 	dias = getDias(list(diccionarioMediaNodos.keys()))
 
 	mostrarBarras(dias, ipSeleccionada, 'Días', 'Ancho de banda (bps)', 
-		'Ancho de banda de la IP: ' + list(ipSeleccionada.keys())[0], CARPETA_IMAGEN_IP_CONCRETA)
+		'Ancho de banda de la IP: ' + ip, CARPETA_IMAGEN_IP_CONCRETA)
+
+
+def generarGraficaNombreDeDominio():
+	dominio = input('Introduce el nombre del dominio: ').strip()
+
+	diccionarioNodos = leerTodo()
+
+	diccionarioMediaNodos = getMediaAnchoPorDia(diccionarioNodos)
+
+	diccionarioIPs = crearDiccionarioIPs(diccionarioMediaNodos)
+
+	diccionarioNombres = getNombreNodosPorIP(diccionarioMediaNodos, diccionarioIPs)
+
+	ipsDominio = []
+
+	for ip, nombre in diccionarioNombres.items():
+		if nombre == dominio:
+			ipsDominio.append(ip)
+
+	ipSeleccionada = dict()
+	for k, v in diccionarioMediaNodos.items():
+		for nodo in v:
+			if nodo.nombre.strip() == dominio and k in ipSeleccionada:
+				ipSeleccionada[k].append(nodo.ancho)
+			elif nodo.nombre.strip() == dominio:
+				ipSeleccionada.update({k : [nodo.ancho]})
+
+	dias = getDias(list(ipSeleccionada.keys()))
+
+	mostrarBarras(dias, ipSeleccionada, 'Días', 'Ancho de banda (bps)', 
+		'Ancho de banda del dominio ' + dominio, CARPETA_NOMBRE_DOMINIO)
 
 
 def generarGraficaIntervalo():
@@ -492,8 +525,9 @@ def generarGraficaUnaIPEnIntervalo():
 seguir = True
 while seguir:
 	print('Elige una opción:\n\n1.- Gráfica general\n2.- Top 5 nodos\n3.- Gráfica de un día concreto\n' + 
-		'4.- Gráfica de una IP concreta\n5.- Gráfica en un intervalo de días\n6.- Top 5 nodos en unintervalo de días\n' + 
-		'7.- Gráfica de una IP concreta en un intervalo de tiempo\n8.- Salir')
+		'4.- Gráfica de una IP concreta\n5.- Gráfica de un nombre de dominio concreto\n6.- Gráfica en un intervalo de días\n' + 
+		'7.- Top 5 nodos en unintervalo de días\n8.- Gráfica de una IP concreta en un intervalo de tiempo\n'  + 
+		'9.- Gráfica de un nombre de dominio concreto en un intervalo de tiempo\n10.- Salir')
 	eleccion = int(input(''))
 	os.system('clear')
 	if eleccion == 1:
@@ -505,10 +539,14 @@ while seguir:
 	elif eleccion == 4:
 		generarGraficaUnaIP()
 	elif eleccion == 5:
-		generarGraficaIntervalo()
+		generarGraficaNombreDeDominio()
 	elif eleccion == 6:
-		generarTop5EnIntervalo()
+		generarGraficaIntervalo()
 	elif eleccion == 7:
-		generarGraficaUnaIPEnIntervalo()
+		generarTop5EnIntervalo()
 	elif eleccion == 8:
+		generarGraficaUnaIPEnIntervalo()
+	elif eleccion == 9:
+		pass
+	elif eleccion == 10:
 		seguir = False
