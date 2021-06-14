@@ -449,7 +449,8 @@ def generarGraficaIntervalo():
 	dias = getDias(diccionarioIntervalo)
 
 	mostrarGrafica(dias, diccionarioIPs, listaNombres, 'Día', 'Ancho de banda (bps)', 
-		'Nodos entre el ' + diaInicial.strftime('%d/%m') + ' y el ' + diaFinal.strftime('%d/%m'), CARPETA_IMAGEN_INTERVALO)
+		'Nodos entre el ' + diaInicial.strftime('%d/%m') + ' y el ' + (diaFinal - timedelta(days=1)).strftime('%d/%m'), 
+		CARPETA_IMAGEN_INTERVALO)
 
 
 def generarTop5EnIntervalo():
@@ -486,7 +487,7 @@ def generarTop5EnIntervalo():
 	dias = getDias(diccionarioIntervalo)
 
 	mostrarGrafica(dias, diccionarioIPs, listaNombres, 'Día', 'Ancho de banda (bps)', 'Top 5 nodos entre el ' + 
-		diaInicial.strftime('%d/%m') + ' y el ' + diaFinal.strftime('%d/%m'), CARPETA_IMAGEN_TOP5_INTERVALO)
+		diaInicial.strftime('%d/%m') + ' y el ' + (diaFinal - timedelta(days=1)).strftime('%d/%m'), CARPETA_IMAGEN_TOP5_INTERVALO)
 
 def generarGraficaUnaIPEnIntervalo():
 	ip = input('Introduce la IP: ')
@@ -523,7 +524,7 @@ def generarGraficaUnaIPEnIntervalo():
 	dias = getDias(diccionarioIntervalo)
 
 	mostrarBarras(dias, ipSeleccionada, 'Días', 'Ancho de banda (bps)', 'Ancho de banda de la IP ' + 
-		ip + ' entre el ' + diaInicial.strftime('%d/%m') + ' y el ' + diaFinal.strftime('%d/%m'), 
+		ip + ' entre el ' + diaInicial.strftime('%d/%m') + ' y el ' + (diaFinal - timedelta(days=1)).strftime('%d/%m'), 
 		CARPETA_IMAGEN_IP_EN_INTERVALO)
 
 
@@ -581,7 +582,7 @@ def generarGraficaNombreDeDominioIntervalo():
 
 	mostrarBarras(dias, ipSeleccionada, 'Días', 'Ancho de banda (bps)', 
 		'Ancho de banda del dominio ' + dominio + ' entre el ' + diaInicial.strftime('%d/%m') + ' y el ' + 
-		diaFinal.strftime('%d/%m'), CARPETA_NOMBRE_DOMINIO_INTERVALO)
+		(diaFinal - timedelta(days=1)).strftime('%d/%m'), CARPETA_NOMBRE_DOMINIO_INTERVALO)
 
 
 seguir = True
@@ -590,7 +591,12 @@ while seguir:
 		'4.- Gráfica de una IP concreta\n5.- Gráfica de un nombre de dominio concreto\n6.- Gráfica en un intervalo de días\n' + 
 		'7.- Top 5 nodos en unintervalo de días\n8.- Gráfica de una IP concreta en un intervalo de tiempo\n'  + 
 		'9.- Gráfica de un nombre de dominio concreto en un intervalo de tiempo\n10.- Salir')
-	eleccion = int(input(''))
+	try:
+		eleccion = int(input(''))
+	except:
+		print('Opción no válida')
+		continue
+
 	os.system('clear')
 	if eleccion == 1:
 		generarGraficaGeneral()
@@ -612,3 +618,6 @@ while seguir:
 		generarGraficaNombreDeDominioIntervalo()
 	elif eleccion == 10:
 		seguir = False
+		print('Adios')
+	else:
+		print('Opción no válida')
