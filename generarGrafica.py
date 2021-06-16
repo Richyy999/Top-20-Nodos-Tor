@@ -193,6 +193,19 @@ def getTop5(diccionarioNodos):
 	return diccionarioTop5
 
 
+def getNodosPorNombre(diccionarioNodos, dominio):
+	diccionarioNodosPorNombre = dict()
+	for dia, nodos in diccionarioNodos.items():
+		for nodo in nodos:
+			if nodo.nombre == dominio:
+				if not nodo in diccionarioNodosPorNombre.values():
+					diccionarioNodosPorNombre[dia] = [nodo]
+				else:
+					diccionarioNodosPorNombre[dia].append(nodo)
+
+	return diccionarioNodosPorNombre
+
+
 def getNombreNodos(diccionarioNodos):
 	listaNombres = []
 	for nodos in diccionarioNodos.values():
@@ -396,31 +409,17 @@ def generarGraficaNombreDeDominio():
 
 	diccionarioMediaNodos = getMediaAnchoPorDia(diccionarioNodos)
 
-	diccionarioIPs = crearDiccionarioIPs(diccionarioMediaNodos)
+	diccionarioDominio = getNodosPorNombre(diccionarioMediaNodos, dominio)
 
-	diccionarioNombres = getNombreNodosPorIP(diccionarioMediaNodos, diccionarioIPs)
+	diccionarioIPs = crearDiccionarioIPs(diccionarioDominio)
 
-	ipsDominio = []
+	dias = getDias(list(diccionarioDominio.keys()))
 
-	for ip, nombre in diccionarioNombres.items():
-		if nombre == dominio:
-			ipsDominio.append(ip)
-
-	if len(ipsDominio) > 1:
-		print('EL nombre de dominio debe ser único. Intenta buscarlo por su IP.')
+	if len(diccionarioIPs) > 1:
+		print('El nombre del dominio debe ser único. Intenta buscarlo por su IP')
 		return
 
-	ipSeleccionada = dict()
-	for k, v in diccionarioMediaNodos.items():
-		for nodo in v:
-			if nodo.nombre.strip() == dominio and k in ipSeleccionada:
-				ipSeleccionada[k].append(nodo.ancho)
-			elif nodo.nombre.strip() == dominio:
-				ipSeleccionada.update({k : [nodo.ancho]})
-
-	dias = getDias(list(ipSeleccionada.keys()))
-
-	mostrarBarras(dias, ipSeleccionada, 'Días', 'Ancho de banda (bps)', 
+	mostrarBarras(dias, diccionarioIPs, 'Días', 'Ancho de banda (bps)', 
 		'Ancho de banda del dominio ' + dominio, CARPETA_NOMBRE_DOMINIO)
 
 
@@ -556,33 +555,35 @@ def generarGraficaNombreDeDominioIntervalo():
 
 	diccionarioIntervalo = getNodosEnIntervalo(diccionarioMediaNodos, diaInicial, diaFinal)
 
-	diccionarioIPs = crearDiccionarioIPs(diccionarioIntervalo)
+	diccionarioDominio = getNodosPorNombre(diccionarioIntervalo, dominio)
 
-	diccionarioNombres = getNombreNodosPorIP(diccionarioIntervalo, diccionarioIPs)
+	diccionarioIPs = crearDiccionarioIPs(diccionarioDominio)
 
-	ipsDominio = []
+	dias = getDias(list(diccionarioDominio.keys()))
 
-	for ip, nombre in diccionarioNombres.items():
-		if nombre == dominio:
-			ipsDominio.append(ip)
-
-	if len(ipsDominio) > 1:
-		print('EL nombre de dominio debe ser único. Intenta buscarlo por su IP.')
+	if len(diccionarioIPs) > 1:
+		print('El nombre del dominio debe ser único. Intenta buscarlo por su IP')
 		return
 
-	ipSeleccionada = dict()
-	for k, v in diccionarioMediaNodos.items():
-		for nodo in v:
-			if nodo.nombre.strip() == dominio and k in ipSeleccionada:
-				ipSeleccionada[k].append(nodo.ancho)
-			elif nodo.nombre.strip() == dominio:
-				ipSeleccionada.update({k : [nodo.ancho]})
-
-	dias = getDias(list(ipSeleccionada.keys()))
-
-	mostrarBarras(dias, ipSeleccionada, 'Días', 'Ancho de banda (bps)', 
+	mostrarBarras(dias, diccionarioIPs, 'Días', 'Ancho de banda (bps)', 
 		'Ancho de banda del dominio ' + dominio + ' entre el ' + diaInicial.strftime('%d/%m') + ' y el ' + 
 		(diaFinal - timedelta(days=1)).strftime('%d/%m'), CARPETA_NOMBRE_DOMINIO_INTERVALO)
+
+
+def obtenerIPsPorNombre():
+	dominio = input('Introduce el nombre del dominio: ')
+	diccionarioNodos = leerTodo()
+
+	diccionarioIPs = crearDiccionarioIPs(diccionarioNodos)
+
+	listaNombres = getNombreNodosPorIP(diccionarioNodos, diccionarioIPs)
+
+	if not dominio in listaNombres.values():
+		print('\nNo existen nodos con ese nombre')
+	else:
+		for ip, nombre in listaNombres.items():
+			if nombre == dominio:
+				print('\n' + ip)
 
 
 seguir = True
@@ -590,7 +591,8 @@ while seguir:
 	print('Elige una opción:\n\n1.- Gráfica general\n2.- Top 5 nodos\n3.- Gráfica de un día concreto\n' + 
 		'4.- Gráfica de una IP concreta\n5.- Gráfica de un nombre de dominio concreto\n6.- Gráfica en un intervalo de días\n' + 
 		'7.- Top 5 nodos en unintervalo de días\n8.- Gráfica de una IP concreta en un intervalo de tiempo\n'  + 
-		'9.- Gráfica de un nombre de dominio concreto en un intervalo de tiempo\n10.- Salir')
+		'9.- Gráfica de un nombre de dominio concreto en un intervalo de tiempo\n10.- Obtener el nombre de un Dominio por su IP\n'+
+		'11.- Salir')
 	try:
 		eleccion = int(input(''))
 	except:
@@ -617,6 +619,8 @@ while seguir:
 	elif eleccion == 9:
 		generarGraficaNombreDeDominioIntervalo()
 	elif eleccion == 10:
+		obtenerIPsPorNombre()
+	elif eleccion == 11:
 		seguir = False
 		print('Adios')
 	else:
